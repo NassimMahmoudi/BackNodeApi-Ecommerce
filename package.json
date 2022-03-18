@@ -1,0 +1,27 @@
+{
+  "name": "back-node",
+  "version": "1.0.0",
+  "description": "back node project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NassimMahmoudi/Back-nodeApi.git"
+  },
+  "author": "Nassim Mahmoudi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NassimMahmoudi/Back-nodeApi/issues"
+  },
+  "homepage": "https://github.com/NassimMahmoudi/Back-nodeApi#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.17.3",
+    "express-session": "^1.17.2",
+    "joi": "^17.6.0",
+    "mongoose": "^6.2.6",
+    "sha1": "^1.1.1"
+  }
+}
