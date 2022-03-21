@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
-mongoose.connect('mongodb://localhost:27017/myDb')
+const dbConfig = require("./config");
+mongoose.connect(dbConfig.url+dbConfig.database)
 .then(()=> console.log('Mongo is UP.'))
 .catch(err => console.log('Mongo is Down , raison : ',err.message));

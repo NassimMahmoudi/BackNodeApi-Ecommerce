@@ -7,7 +7,8 @@ const agent_schema = new mongoose.Schema({
     pass: String,
     email : String,
     phone : String,
-    role : String
+    role : String,
+    image : String
 });
 
 let agent_validation = Joi.object({
@@ -17,7 +18,8 @@ let agent_validation = Joi.object({
     pass: Joi.string().required(),
     email: Joi.string().required(),
     phone : Joi.string().length(8),
-    role : Joi.string()
+    role : Joi.string(),
+    image : Joi.string()
 });
 
 const Agent = mongoose.model('agent',agent_schema);

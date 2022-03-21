@@ -1,7 +1,7 @@
 const router = require('express').Router();
 var sha1 = require('sha1');
 const {Agent,agent_validation} = require('../models/agent');
-
+const uploadController = require("../controllers/upload");
 function validation(validator,req,res) {
     let results = validator.validate(req.body);
     if(results.error)
@@ -57,6 +57,9 @@ router.post('/logout', async (req, res)=>{
 // Add Agent
 router.post('',async (req,res)=>{
     validation(agent_validation,req,res);
+    // upload agent photo
+    req.body.image=uploadController.uploadFiles;
+    // crypting pass
     req.body.pass = sha1(req.body.pass);
     let agent = new Agent(req.body);   
     try {
@@ -66,7 +69,36 @@ router.post('',async (req,res)=>{
     }
     
 });
-
+//update agent (Edit Profil)
+router.put('/:email',async (req,res)=>{
+    const email = req.params.email;
+    const old_pass = sha1(req.body.old_pass);
+    let agent = await Agent.findOne({
+        email
+      });
+      if (!agent)
+          return res.status(404).json({
+            message: "Agent Not Exist"
+          });
+        if(old_pass===agent.pass){
+            try {
+                let results= agent_validation.validate(req.body);
+                if(results.error)
+                    return res.status(400).send(results.error.details[0].message);
+                
+                await Agent.updateOne({_id : req.params.id}, req.body);
+                res.send(await Produit.Agent(req.params.id));
+            } catch (error) {
+                res.status(500).send('Error editing Agent Profil :'+error.message);
+            }  
+        }else{
+            return res.status(401).json({
+                message: "Incorrect Password !"
+              });
+        }  
+    
+    
+});
 //delete Agent
 router.delete('/delete/:id',async (req,res)=>{
     try {
@@ -75,7 +107,7 @@ router.delete('/delete/:id',async (req,res)=>{
             return res.status(404).send('Agent with id is not found');
         res.send(agent);
     }catch (error) {
-        res.status(400).send('Error Deleting Agent :'+error.message);
+        res.status(500).send('Error Deleting Agent :'+error.message);
     }
     
 });
