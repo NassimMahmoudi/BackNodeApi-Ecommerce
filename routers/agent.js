@@ -1,12 +1,7 @@
 const router = require('express').Router();
 var sha1 = require('sha1');
 const {Agent,agent_validation} = require('../models/agent');
-const uploadController = require("../controllers/upload");
-function validation(validator,req,res) {
-    let results = validator.validate(req.body);
-    if(results.error)
-        return res.status(400).send(results.error.details[0].message);
-}
+const upload= require("../middleware/upload");
 
 // Get Agent by ID for test
 router.get('/:id',async (req,res)=>{
@@ -55,17 +50,26 @@ router.post('/logout', async (req, res)=>{
 	res.status(200).json({logout:true});
 }); 
 // Add Agent
-router.post('',async (req,res)=>{
-    validation(agent_validation,req,res);
-    // upload agent photo
-    req.body.image=uploadController.uploadFiles;
+router.post('/add',upload, async (req,res)=>{
     // crypting pass
     req.body.pass = sha1(req.body.pass);
-    let agent = new Agent(req.body);   
+    let agent= new Agent({
+       cin : req.body.cin,
+       nom : req.body.nom,
+       prenom : req.body.prenom,
+       pass : req.body.pass,
+       email : req.body.email,
+       phone : req.body.phone,
+       role : req.body.role,
+       image : req.file.filename,
+    });
+    let results= agent_validation.validate(agent);
+    if(results.error)
+        return res.status(403).send(results.error.details[0].message);
     try {
-        res.send(await agent.save());
+        res.status(200).send(await agent.save());
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(500).send(error.message);
     }
     
 });

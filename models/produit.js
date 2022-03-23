@@ -7,7 +7,11 @@ const produit_schema = new mongoose.Schema({
     colors : [String],
     description : String,
     marque : String,
-    date_ajout : String,
+    date_ajout : {
+        type : Date,
+        required: true,
+        default: Date.now,
+    },
     quantite : Number,
     prix : Number
 });
@@ -18,7 +22,6 @@ let produit_validation = Joi.object({
     colors: Joi.array().items(Joi.string()),
     description: Joi.string().required(),
     marque: Joi.string().required(),
-    date_ajout: Joi.number(),
     quantite : Joi.number().min(0),
     prix : Joi.number()
 });

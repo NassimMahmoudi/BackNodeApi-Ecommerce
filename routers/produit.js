@@ -1,11 +1,8 @@
 const router = require('express').Router();
 const {Produit, produit_validation} = require('../models/produit');
-const uploadController = require("../controllers/upload");
 // add Produit to DB 
 router.post('',async (req,res)=>{
-    var date_ajout = new Date().getTime();
-    req.body.date_ajout=date_ajout;
-    // req.body.image=uploadController.uploadFiles;
+
     try {
         let results= produit_validation.validate(req.body);
         if(results.error)
