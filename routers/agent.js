@@ -75,9 +75,7 @@ router.put('/edit/:email',async (req,res)=>{
         email
       });
       if (!agent)
-          return res.status(404).json({
-            message: "Agent Not Exist"
-          });
+          return res.status(404).send("Agent Not Exist");
         if(old_pass===agent.pass){
             try {
                 let results= agent_validation_update.validate(req.body);
@@ -103,9 +101,7 @@ router.put('/editimage/:email', upload,async (req,res)=>{
         email
       });
     if (!agent)
-        return res.status(404).json({
-        message: "Agent Not Exist"
-        });
+        return res.status(404).send("Agent Not Exist");
     if(req.file){
         new_image=req.file.filename;
         try{

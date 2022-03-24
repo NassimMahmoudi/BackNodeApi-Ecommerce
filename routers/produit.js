@@ -19,9 +19,7 @@ router.post('',async (req,res)=>{
 router.get('/:id',async (req,res)=>{
     let produit = await Produit.findById(req.params.id)
     if (!produit){
-          return res.status(404).json({
-            message: "Product Not Exist"
-          });
+          return res.status(404).send("Product Not Exist");
         }else{
             res.status(200).send(produit);    
         }
@@ -61,7 +59,7 @@ router.delete('/:id',async (req,res)=>{
             return res.status(404).send('Product with id is not found');
         res.send(produit);
     } catch (error) {
-        res.status(400).send('Error Deleting Product :'+error.message);
+        res.status(500).send('Error Deleting Product :'+error.message);
     }
     
 });
