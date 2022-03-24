@@ -1,15 +1,14 @@
 const router = require('express').Router();
 var sha1 = require('sha1');
-const {Agent,agent_validation} = require('../models/agent');
+var fs =require('fs');
+const {Agent,agent_validation,agent_validation_update} = require('../models/agent');
 const upload= require("../middleware/upload");
 
 // Get Agent by ID for test
 router.get('/:id',async (req,res)=>{
     let agent = await Agent.findById(req.params.id)
     if (!agent){
-          return res.status(400).json({
-            message: "Agent Not Exist"
-          });
+          return res.status(404).send("Agent Not Exist");
         }else{
             res.status(200).send(agent);    
         }
@@ -26,27 +25,21 @@ router.post('/signin',async (req,res)=>{
           email
         });
         if (!agent)
-          return res.status(400).json({
-            message: "Agent Not Exist"
-          });
+          return res.status(404).send("Agent Not Exist");
         if(pass===agent.pass){
             res.status(200).json({sign_in:true  });  
         }else{
-            return res.status(401).json({
-                message: "Incorrect Password !"
-              });
+            return res.status(401).send("Incorrect Password !");
         }  
     }catch (e) {
         console.error(e);
-        res.status(500).json({
-          message: "Server Error"
-        });
+        res.status(500).send("Server Error");
       }
      
 });
 //Logout Agent
 router.post('/logout', async (req, res)=>{
-	//req.session.destroy();
+	req.session.destroy();
 	res.status(200).json({logout:true});
 }); 
 // Add Agent
@@ -73,10 +66,11 @@ router.post('/add',upload, async (req,res)=>{
     }
     
 });
-//update agent (Edit Profil)
-router.put('/:email',async (req,res)=>{
-    const email = req.params.email;
-    const old_pass = sha1(req.body.old_pass);
+//update agent (Edit Profil) without image
+router.put('/edit/:email',async (req,res)=>{
+    let email = req.params.email;
+    let old_pass = sha1(req.body.old_pass);
+    req.body.pass = sha1(req.body.pass);
     let agent = await Agent.findOne({
         email
       });
@@ -86,22 +80,46 @@ router.put('/:email',async (req,res)=>{
           });
         if(old_pass===agent.pass){
             try {
-                let results= agent_validation.validate(req.body);
+                let results= agent_validation_update.validate(req.body);
                 if(results.error)
-                    return res.status(400).send(results.error.details[0].message);
+                    return res.status(403).send(results.error.details[0].message);
                 
-                await Agent.updateOne({_id : req.params.id}, req.body);
-                res.send(await Produit.Agent(req.params.id));
+                await Agent.updateOne({_id : agent._id}, req.body);
+                res.status(200).send(await Agent.findById(agent._id));
             } catch (error) {
                 res.status(500).send('Error editing Agent Profil :'+error.message);
             }  
         }else{
-            return res.status(401).json({
-                message: "Incorrect Password !"
-              });
+            return res.status(401).send("Incorrect Password !");
         }  
     
     
+});
+//update agent Image (Edit Profil image)
+router.put('/editimage/:email', upload,async (req,res)=>{
+    let email = req.params.email;
+    let new_image='';
+    let agent = await Agent.findOne({
+        email
+      });
+    if (!agent)
+        return res.status(404).json({
+        message: "Agent Not Exist"
+        });
+    if(req.file){
+        new_image=req.file.filename;
+        try{
+            // Delete old Image from server
+            // IN the front side you should pass the new image and the old image too
+            fs.unlinkSync("../uploads/"+ req.body.old_image);
+        }catch(err){
+            console.log(err);
+        }
+        await Agent.updateOne({_id : agent._id}, {$set: { image : new_image} });
+        res.status(200).send(await Agent.findById(agent._id));
+    }else{
+        res.status(403).send('You must select a new Image');
+    }
 });
 //delete Agent
 router.delete('/delete/:id',async (req,res)=>{

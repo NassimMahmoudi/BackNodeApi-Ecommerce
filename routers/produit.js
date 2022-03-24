@@ -6,12 +6,12 @@ router.post('',async (req,res)=>{
     try {
         let results= produit_validation.validate(req.body);
         if(results.error)
-            return res.status(400).send(results.error.details[0].message);
+            return res.status(403).send(results.error.details[0].message);
         let produit = new Produit(req.body);
         produit = await produit.save();
         res.send(produit);
     } catch (error) {
-        res.status(400).send('Error saving Product :'+error.message);
+        res.status(500).send('Error saving Product :'+error.message);
     }
     
 });
@@ -19,7 +19,7 @@ router.post('',async (req,res)=>{
 router.get('/:id',async (req,res)=>{
     let produit = await Produit.findById(req.params.id)
     if (!produit){
-          return res.status(400).json({
+          return res.status(404).json({
             message: "Product Not Exist"
           });
         }else{
@@ -32,9 +32,9 @@ router.get('/:id',async (req,res)=>{
 router.get('',async (req,res)=>{
     try {
         let produits = await Produit.find();
-        res.send(produits)
+        res.status(200).send(produits)
     } catch (error) {
-        res.status(400).send('Error get All Products :'+error.message);
+        res.status(500).send('Error get All Products :'+error.message);
     }
     
 });
@@ -44,12 +44,12 @@ router.put('/:id',async (req,res)=>{
     try {
         let results= produit_validation.validate(req.body);
         if(results.error)
-            return res.status(400).send(results.error.details[0].message);
+            return res.status(403).send(results.error.details[0].message);
         
         await Produit.updateOne({_id : req.params.id}, req.body);
         res.send(await Produit.findById(req.params.id));
     } catch (error) {
-        res.status(400).send('Error updating Product :'+error.message);
+        res.status(500).send('Error updating Product :'+error.message);
     }
     
 });

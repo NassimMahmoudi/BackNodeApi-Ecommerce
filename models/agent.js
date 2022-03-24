@@ -21,8 +21,19 @@ let agent_validation = Joi.object({
     role : Joi.string(),
     image : Joi.string()
 });
+let agent_validation_update = Joi.object({
+    cin: Joi.number().min(8),
+    nom: Joi.string(),
+    prenom: Joi.string(),
+    pass: Joi.string(),
+    old_pass: Joi.string(),
+    email: Joi.string(),
+    phone : Joi.string().length(8),
+    role : Joi.string()
+});
 
 const Agent = mongoose.model('agent',agent_schema);
 
 module.exports.Agent=Agent;
 module.exports.agent_validation=agent_validation;
+module.exports.agent_validation_update=agent_validation_update;

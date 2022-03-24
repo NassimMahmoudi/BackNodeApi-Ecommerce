@@ -28,7 +28,8 @@ app.use((req,res,next)=>{
   delete req.session.message;
   next();
 });
-
+// Make uploads folder static to display images
+app.use(express.static("uploads"));
 app.use('/api/agent',agent_router);
 app.use('/api/produit',produit_router);
 app.use('/api/client',client_router);
