@@ -7,6 +7,7 @@ const client_schema = new mongoose.Schema({
     pass: String,
     email : String,
     phone : String,
+    image : String
    
 });
 
@@ -17,10 +18,22 @@ let client_validation = Joi.object({
     pass: Joi.string().required(),
     email: Joi.string().required(),
     phone : Joi.string().length(8),
+    image : Joi.string()
    
 });
+let client_validation_update = Joi.object({
+    cin: Joi.number().min(8),
+    nom: Joi.string(),
+    prenom: Joi.string(),
+    pass: Joi.string(),
+    old_pass: Joi.string(),
+    email: Joi.string(),
+    phone : Joi.string().length(8)
+});
+
 
 const Client = mongoose.model('client',client_schema);
 
 module.exports.Client=Client;
 module.exports.client_validation=client_validation;
+module.exports.client_validation_update=client_validation_update;

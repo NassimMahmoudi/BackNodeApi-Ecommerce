@@ -13,7 +13,8 @@ const produit_schema = new mongoose.Schema({
         default: Date.now,
     },
     quantite : Number,
-    prix : Number
+    prix : Number,
+    image : [String]
 });
 
 let produit_validation = Joi.object({
@@ -23,7 +24,8 @@ let produit_validation = Joi.object({
     description: Joi.string().required(),
     marque: Joi.string().required(),
     quantite : Joi.number().min(0),
-    prix : Joi.number()
+    prix : Joi.number(),
+    
 });
 
 const Produit = mongoose.model('produit',produit_schema);
