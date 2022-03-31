@@ -7,6 +7,8 @@ const produit_router = require('./routers/produit');
 const client_router = require('./routers/client');
 const commande_router = require('./routers/commande');
 const facture_router = require('./routers/facture');
+// get configaration fron .env
+require("dotenv").config();
 
 let app = express();
 //cors provides Express middleware to enable CORS with various options
@@ -15,6 +17,7 @@ var corsOptions = {
   };
 app.use(cors(corsOptions));
 app.use(express.json());
+
 // Initialiser express-session
 app.use(
     session({

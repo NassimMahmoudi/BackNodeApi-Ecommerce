@@ -1,6 +1,9 @@
 const router = require('express').Router();
-var sha1 = require('sha1');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 var fs =require('fs');
+const auth = require('../middleware/auth');
+const autoris = require('../middleware/autoris');
 const {Agent,agent_validation,agent_validation_update} = require('../models/agent');
 const upload= require("../middleware/upload");
 
@@ -18,7 +21,7 @@ router.get('/:id',async (req,res)=>{
 // Sign In Agent
 router.post('/signin',async (req,res)=>{
     const email = req.body.email;
-    const pass = sha1(req.body.pass);
+    const pass = req.body.pass ;
 
     try {
         let agent = await Agent.findOne({
@@ -26,11 +29,12 @@ router.post('/signin',async (req,res)=>{
         });
         if (!agent)
           return res.status(404).send("Agent Not Exist");
-        if(pass===agent.pass){
-            res.status(200).json({sign_in:true  });  
-        }else{
-            return res.status(401).send("Incorrect Password !");
-        }  
+        let bool = await bcrypt.compare(pass, agent.pass);
+        if(!bool)
+            return res.status(403).send('Incorrect Password !');
+        let token = jwt.sign({id: agent._id, name: agent.name, role: agent.role}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+        res.header('x-access-token',token).send('Login Success !!!');
+          
     }catch (e) {
         console.error(e);
         res.status(500).send("Server Error");
@@ -45,7 +49,8 @@ router.post('/logout', async (req, res)=>{
 // Add Agent
 router.post('/add',upload, async (req,res)=>{
     // crypting pass
-    req.body.pass = sha1(req.body.pass);
+    let salt = await bcrypt.genSalt(10);
+    req.body.pass = await bcrypt.hash(req.body.pass, salt);
     let agent= new Agent({
        cin : req.body.cin,
        nom : req.body.nom,
@@ -56,9 +61,7 @@ router.post('/add',upload, async (req,res)=>{
        role : req.body.role,
        image : req.file.filename,
     });
-    let results= agent_validation.validate(agent);
-    if(results.error)
-        return res.status(403).send(results.error.details[0].message);
+
     try {
         res.status(200).send(await agent.save());
     } catch (error) {
