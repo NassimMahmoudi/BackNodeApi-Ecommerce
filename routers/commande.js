@@ -21,13 +21,27 @@ router.get('/:id',async (req,res)=>{
     
     });
 
-
+// get All commandes
+router.get('',async (req,res)=>{
+    try {
+        let commandes = await Commande.find();
+        res.status(200).send(commandes)
+    } catch (error) {
+        res.status(500).send('Error get All commandes :'+error.message);
+    }
+    
+});
 
 
 // Add Commande
-router.post('',async (req,res)=>{
+router.post('/add',async (req,res)=>{
     validation(commande_validation,req,res);
-    let commande = new Commande(req.body);   
+    let commande= new Commande({
+        total : req.body.total,
+        id_client : req.body.id_client,
+        status : req.body.status,
+        products : req.body.products,
+     });
     try {
         res.send(await commande.save());
     } catch (error) {

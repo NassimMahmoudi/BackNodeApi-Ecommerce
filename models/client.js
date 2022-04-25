@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const { boolean } = require('joi');
 const client_schema = new mongoose.Schema({
     cin : Number,
     nom : String,
@@ -7,6 +8,16 @@ const client_schema = new mongoose.Schema({
     pass: String,
     email : String,
     phone : String,
+    is_verified : {
+        type : Boolean,
+        required: true,
+        default: 'false',
+    },
+    is_blocked : {
+        type : Boolean,
+        required: true,
+        default: 'false',
+    },
     image : String
    
 });

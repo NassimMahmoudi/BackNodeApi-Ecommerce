@@ -1,6 +1,9 @@
 const router = require('express').Router();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 var sha1 = require('sha1');
 const {Client,client_validation} = require('../models/client');
+const upload= require("../middleware/upload");
 
 function validation(validator,req,res) {
     let results = validator.validate(req.body);
@@ -51,18 +54,30 @@ router.post('/signin',async (req,res)=>{
 });
 //Logout Client
 router.post('/logout', async (req, res)=>{
-	//req.session.destroy();
-	res.status(200).json({logout:true});
+	req.session.destroy();
+	res.status(200).send('Logout Success !!!');
 }); 
-// Add Client
-router.post('',async (req,res)=>{
-    validation(client_validation,req,res);
-    req.body.pass = sha1(req.body.pass);
-    let client = new Client(req.body);   
+
+// Signup Client
+router.post('/signup',upload, async (req,res)=>{
+    // crypting pass
+    let salt = await bcrypt.genSalt(10);
+    req.body.pass = await bcrypt.hash(req.body.pass, salt);
+    let client= new Client({
+       cin : req.body.cin,
+       nom : req.body.nom,
+       prenom : req.body.prenom,
+       pass : req.body.pass,
+       email : req.body.email,
+       phone : req.body.phone,
+       image : req.file.filename,
+    });
+
     try {
-        res.send(await client.save());
+        
+        res.status(200).send(await client.save());
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(500).send(error.message);
     }
     
 });

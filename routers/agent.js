@@ -44,7 +44,7 @@ router.post('/signin',async (req,res)=>{
 //Logout Agent
 router.post('/logout', async (req, res)=>{
 	req.session.destroy();
-	res.status(200).json({logout:true});
+	res.status(200).send('Logout Success !!!');
 }); 
 // Add Agent
 router.post('/add',upload, async (req,res)=>{
@@ -120,7 +120,7 @@ router.put('/editimage/:email', upload,async (req,res)=>{
         res.status(403).send('You must select a new Image');
     }
 });
-//delete Agent
+//delete Agent 
 router.delete('/delete/:id',async (req,res)=>{
     try {
         let agent = await Agent.findByIdAndRemove(req.params.id);

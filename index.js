@@ -7,7 +7,7 @@ const produit_router = require('./routers/produit');
 const client_router = require('./routers/client');
 const commande_router = require('./routers/commande');
 const facture_router = require('./routers/facture');
-// get configaration fron .env
+// get configaration from .env
 require("dotenv").config();
 
 let app = express();
