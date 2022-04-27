@@ -78,10 +78,9 @@ router.post('/signup',upload, async (req,res)=>{
             
         html = {};
         html.content = fs.readFileSync(__dirname+"/../assets/new_client.html", "utf8");
-        html.password = new_member.pass;
-        html.email = new_member.email;
         html.firstname = new_member.nom;
-        html.urlApp = process.env.DOMAINE+"/#/client/verifmail?id="+new_member._id;
+        html.urlApp = process.env.DOMAINE+"/api/client/verifmail?id="+new_member._id;
+        console.log(html);
         service.Send_mail_new_client(from,new_member.email,subject,html);
         res.status(200).send(new_member);
     } catch (error) {

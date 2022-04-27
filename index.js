@@ -31,13 +31,18 @@ app.use((req,res,next)=>{
   delete req.session.message;
   next();
 });
-// Make uploads folder static to display images
-app.use(express.static("uploads"));
+// serve all static files inside public directory display images
+app.use(express.static('public')); 
+app.use('/assets/img', express.static('assets/img'));
+app.use('/uploads', express.static("uploads"));
+
+
 app.use('/api/agent',agent_router);
 app.use('/api/produit',produit_router);
 app.use('/api/client',client_router);
 app.use('/api/commande',commande_router);
 app.use('/api/facture',facture_router);
+
 
 app.listen(process.env.PORT,() => {
     console.log(`Running at localhost:${process.env.PORT}`);
