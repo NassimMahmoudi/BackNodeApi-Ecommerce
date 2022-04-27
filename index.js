@@ -38,7 +38,7 @@ app.use('/api/produit',produit_router);
 app.use('/api/client',client_router);
 app.use('/api/commande',commande_router);
 app.use('/api/facture',facture_router);
-let port = 3000;
-app.listen(port,() => {
-    console.log(`Running at localhost:${port}`);
+
+app.listen(process.env.PORT,() => {
+    console.log(`Running at localhost:${process.env.PORT}`);
   });

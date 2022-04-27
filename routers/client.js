@@ -1,15 +1,11 @@
 const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+var fs =require('fs');
 var sha1 = require('sha1');
 const {Client,client_validation} = require('../models/client');
 const upload= require("../middleware/upload");
-
-function validation(validator,req,res) {
-    let results = validator.validate(req.body);
-    if(results.error)
-        return res.status(400).send(results.error.details[0].message);
-}
+const service= require("../services/service");
 
 // Get Client by ID for test
 router.get('/:id',async (req,res)=>{
@@ -74,12 +70,75 @@ router.post('/signup',upload, async (req,res)=>{
     });
 
     try {
-        
-        res.status(200).send(await client.save());
+        let new_member= await client.save();
+        // node mailer
+        //Send MAil(token,email,url app,password)
+        from = process.env.EMAIL;
+        subject="Verification email for new client";
+            
+        html = {};
+        html.content = fs.readFileSync(__dirname+"/../assets/new_client.html", "utf8");
+        html.password = new_member.pass;
+        html.email = new_member.email;
+        html.firstname = new_member.nom;
+        html.urlApp = process.env.DOMAINE+"/#/client/verifmail?id="+new_member._id;
+        service.Send_mail_new_client(from,new_member.email,subject,html);
+        res.status(200).send(new_member);
     } catch (error) {
         res.status(500).send(error.message);
     }
     
+});
+//update client (Edit Profil) without image
+router.put('/edit/:email',async (req,res)=>{
+    let email = req.params.email;
+    let old_pass = sha1(req.body.old_pass);
+    req.body.pass = sha1(req.body.pass);
+    let client = await Client.findOne({
+        email
+      });
+      if (!client)
+          return res.status(404).send("Client Not Exist");
+        if(old_pass===client.pass){
+            try {
+                let results= client_validation_update.validate(req.body);
+                if(results.error)
+                    return res.status(403).send(results.error.details[0].message);
+                
+                await Client.updateOne({_id : client._id}, req.body);
+                res.status(200).send(await Client.findById(client._id));
+            } catch (error) {
+                res.status(500).send('Error editing Client Profil :'+error.message);
+            }  
+        }else{
+            return res.status(401).send("Incorrect Password !");
+        }  
+    
+    
+});
+//update Client Image (Edit Profil image)
+router.put('/editimage/:email', upload,async (req,res)=>{
+    let email = req.params.email;
+    let new_image='';
+    let client = await Client.findOne({
+        email
+      });
+    if (!client)
+        return res.status(404).send("Client Not Exist");
+    if(req.file){
+        new_image=req.file.filename;
+        try{
+            // Delete old Image from server
+            // IN the front side you should pass the new image and the old image too
+            fs.unlinkSync("../uploads/"+ req.body.old_image);
+        }catch(err){
+            console.log(err);
+        }
+        await Client.updateOne({_id : client._id}, {$set: { image : new_image} });
+        res.status(200).send(await Client.findById(client._id));
+    }else{
+        res.status(403).send('You must select a new Image');
+    }
 });
 
 //delete Client
