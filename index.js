@@ -1,4 +1,5 @@
 require('./db/connect')
+
 const cors = require("cors");
 const express = require('express');
 const session = require('express-session');
@@ -36,6 +37,9 @@ app.use(express.static('public'));
 app.use('/assets/img', express.static('assets/img'));
 app.use('/uploads', express.static("uploads"));
 
+app.get('/', function (req, res) {
+  res.send('<b>My</b> first express http server');
+});
 
 app.use('/api/agent',agent_router);
 app.use('/api/produit',produit_router);

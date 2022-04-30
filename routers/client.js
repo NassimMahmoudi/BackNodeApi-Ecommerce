@@ -6,18 +6,18 @@ var sha1 = require('sha1');
 const {Client,client_validation} = require('../models/client');
 const upload= require("../middleware/upload");
 const service= require("../services/service");
+var randomstring = require("randomstring");
+
 
 // Get Client by ID for test
 router.get('/:id',async (req,res)=>{
     let client = await Client.findById(req.params.id)
+    
     if (!client){
-          return res.status(400).json({
-            message: "Client Not Exist"
-          });
+          return res.status(400).send("Client Not Exist");
         }else{
             res.status(200).send(client);    
         }
-    
     });
 
 // Sign In Client
@@ -48,6 +48,7 @@ router.post('/signin',async (req,res)=>{
       }
      
 });
+
 //Logout Client
 router.post('/logout', async (req, res)=>{
 	req.session.destroy();
@@ -59,13 +60,18 @@ router.post('/signup',upload, async (req,res)=>{
     // crypting pass
     let salt = await bcrypt.genSalt(10);
     req.body.pass = await bcrypt.hash(req.body.pass, salt);
-    let client= new Client({
+    req.body.confirmation_code = randomstring.generate({
+        length: 6,
+      });
+      console.log(req.body.confirmation_code);
+    let client = new Client({
        cin : req.body.cin,
        nom : req.body.nom,
        prenom : req.body.prenom,
        pass : req.body.pass,
        email : req.body.email,
        phone : req.body.phone,
+       confirmation_code : req.body.confirmation_code,
        image : req.file.filename,
     });
 
@@ -79,14 +85,36 @@ router.post('/signup',upload, async (req,res)=>{
         html = {};
         html.content = fs.readFileSync(__dirname+"/../assets/new_client.html", "utf8");
         html.firstname = new_member.nom;
-        html.urlApp = process.env.DOMAINE+"/api/client/verifmail?id="+new_member._id;
-        console.log(html);
+        html.confirmation_code = new_member.confirmation_code;
         service.Send_mail_new_client(from,new_member.email,subject,html);
         res.status(200).send(new_member);
     } catch (error) {
         res.status(500).send(error.message);
     }
     
+});
+// verif account
+router.put('/verifmail/:id', async (req, res)=> {
+    let id_client=req.params.id
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(id_client)){
+        return res.status(301).send("Client Not Exist");
+    }
+
+    let client_verif = await Client.findOne({
+        id_client
+      });
+      if (!client_verif){
+          return res.status(404).send("Client Not Exist");
+      }
+      else{
+        try {            
+            await Client.updateOne({_id : id_client}, {is_verified : 'true'});
+            res.status(200).send('Verified User !!');
+        } catch (error) {
+            res.status(500).send('Error verify email Client  :'+error.message);
+        }  
+      }
 });
 //update client (Edit Profil) without image
 router.put('/edit/:email',async (req,res)=>{

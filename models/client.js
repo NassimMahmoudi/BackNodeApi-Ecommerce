@@ -18,6 +18,10 @@ const client_schema = new mongoose.Schema({
         required: true,
         default: 'false',
     },
+    confirmation_code :{
+        type : String,
+        required: true,
+    },
     image : String
    
 });

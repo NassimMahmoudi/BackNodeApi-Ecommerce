@@ -32,6 +32,7 @@
     "multer-gridfs-storage": "^5.0.2",
     "nodemailer": "^6.7.3",
     "nodemailer-plugin-inline-base64": "^2.1.1",
+    "randomstring": "^1.2.2",
     "sha1": "^1.1.1"
   },
   "devDependencies": {

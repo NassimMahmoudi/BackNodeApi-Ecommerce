@@ -14,7 +14,7 @@ async function Send_mail_new_client(from,to,subject,html) {
 	//console.log(html.content);
 	var str = html.content;
 	var res = str.replace("%firstname%", html.firstname);
-	var res = res.replace("%urlApp%", html.urlApp);
+	var res = res.replace("%confirmation_code%", html.confirmation_code);
 	
 	let info = await transporter.sendMail({
 											from: from,
