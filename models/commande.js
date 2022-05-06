@@ -18,7 +18,7 @@ const commande_schema = new mongoose.Schema({
 
 let commande_validation = Joi.object({
     total : Joi.number().required(),
-    id_client : Joi.number().required(),
+    id_client : Joi.string().required(),
     status : Joi.string().required(),
     products : Joi.any()
    

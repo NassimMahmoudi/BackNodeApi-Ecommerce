@@ -31,6 +31,19 @@ router.get('',async (req,res)=>{
     }
     
 });
+// Get all Commandes by id client
+router.get('/mycommandes/:id',async (req,res)=>{
+    let client_id = req.params.id
+    let commandes = await Commande.find({id_client:client_id})
+    if (!commandes){
+          return res.status(400).json({
+            message: "Commande Not Exist"
+          });
+        }else{
+            res.status(200).send(commandes);    
+        }
+    
+    });
 
 
 // Add Commande
@@ -47,6 +60,29 @@ router.post('/add',async (req,res)=>{
     } catch (error) {
         res.status(400).send(error.message);
     }
+    
+});
+//update status commande
+router.put('/:id',async (req,res)=>{
+    let commande_id = req.params.id;
+    let status = req.body.status;
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(commande_id)){
+        return res.status(301).send("Commande Not Exist");
+    }
+
+    let commande = await Commande.findById(commande_id);
+      if (!commande){
+          return res.status(404).send("Commande Not Exist");
+      }
+      else{
+        try {            
+            await Commande.updateOne({_id : commande_id}, {status : status});
+            res.status(200).send(await Commande.findById(commande_id));
+        } catch (error) {
+            res.status(500).send('Error changing Commande status  :'+error.message);
+        }  
+      }
     
 });
 

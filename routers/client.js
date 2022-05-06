@@ -20,6 +20,16 @@ router.get('/:id',async (req,res)=>{
         }
     });
 
+// get All Clients
+router.get('',async (req,res)=>{
+    try {
+        let clients = await Client.find();
+        res.status(200).send(clients)
+    } catch (error) {
+        res.status(500).send('Error get All Clients :'+error.message);
+    }
+    
+});
 // Sign In Client
 router.post('/signin',async (req,res)=>{
     const email = req.body.email;
@@ -96,24 +106,32 @@ router.post('/signup',upload, async (req,res)=>{
 // verif account
 router.put('/verifmail/:id', async (req, res)=> {
     let id_client=req.params.id
+    console.log(id_client)
+    let code_client=req.body.code
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(id_client)){
         return res.status(301).send("Client Not Exist");
     }
 
-    let client_verif = await Client.findOne({
-        id_client
-      });
+    let client_verif = await Client.findById(id_client);
       if (!client_verif){
           return res.status(404).send("Client Not Exist");
       }
       else{
-        try {            
-            await Client.updateOne({_id : id_client}, {is_verified : 'true'});
-            res.status(200).send('Verified User !!');
-        } catch (error) {
-            res.status(500).send('Error verify email Client  :'+error.message);
-        }  
+          console.log(client_verif.confirmation_code)
+          console.log(client_verif)
+          console.log(code_client)
+          if(client_verif.confirmation_code==code_client){
+            try {            
+                await Client.updateOne({_id : id_client}, {is_verified : 'true'});
+                res.status(200).send('Verified User !!');
+            } catch (error) {
+                res.status(500).send('Error verify email Client  :'+error.message);
+            }  
+        }
+        else {
+            return res.status(301).send("Error verify email Client code not exist!! ");
+        }
       }
 });
 //update client (Edit Profil) without image
@@ -166,6 +184,28 @@ router.put('/editimage/:email', upload,async (req,res)=>{
     }else{
         res.status(403).send('You must select a new Image');
     }
+});
+//block client
+router.put('/block/:id',async (req,res)=>{
+    let client_id = req.params.id;
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(client_id)){
+        return res.status(301).send("Client Not Exist");
+    }
+
+    let client = await Client.findById(client_id);
+      if (!client){
+          return res.status(404).send("Client Not Exist");
+      }
+      else{
+        try {            
+            await Client.updateOne({_id : client_id}, {is_blocked : 'true'});
+            res.status(200).send(await Client.findById(client_id));
+        } catch (error) {
+            res.status(500).send('Error blocking client  :'+error.message);
+        }  
+      }
+    
 });
 
 //delete Client
