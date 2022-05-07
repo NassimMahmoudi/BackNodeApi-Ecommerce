@@ -33,28 +33,28 @@ router.get('',async (req,res)=>{
 // Sign In Client
 router.post('/signin',async (req,res)=>{
     const email = req.body.email;
-    const pass = sha1(req.body.pass);
+    const pass = req.body.pass ;
 
     try {
         let client = await Client.findOne({
           email
         });
         if (!client)
-          return res.status(400).json({
-            message: "Client Not Exist"
-          });
-        if(pass===client.pass){
-            res.status(200).json({sign_in:true  });  
+            return res.status(404).json("Client Not Exist");
+        if (!client.is_verified)
+            return res.status(403).json('Not Verified Client!');
+        if (!client.is_blocked){
+        let bool = await bcrypt.compare(pass, client.pass);
+        if(!bool)
+            return res.status(403).send('Incorrect Password !');
+        let token = jwt.sign({id: client._id, name: client.name}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+        res.header('x-access-token',token).send('Login Success !!!');
         }else{
-            return res.status(401).json({
-                message: "Incorrect Password !"
-              });
-        }  
+            return res.status(403).json('Blocked Client!');
+        }
     }catch (e) {
         console.error(e);
-        res.status(500).json({
-          message: "Server Error"
-        });
+        res.status(500).send("Server Error");
       }
      
 });
