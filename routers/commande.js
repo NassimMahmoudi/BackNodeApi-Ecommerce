@@ -64,7 +64,7 @@ router.post('/add',async (req,res)=>{
         products : req.body.products,
      });
     try {
-        res.send(await commande.save());
+        res.status(200).send(await commande.save());
     } catch (error) {
         res.status(400).send(error.message);
     }

@@ -18,7 +18,7 @@ router.post('/add',upload,async (req,res)=>{
         let results= produit_validation.validate(req.body);
         if(results.error)
             return res.status(403).send(results.error.details[0].message);
-        res.status(500).send(await product.save());
+        res.status(200).send(await product.save());
     } catch (error) {
         res.status(500).send('Error saving Product :'+error.message);
     }

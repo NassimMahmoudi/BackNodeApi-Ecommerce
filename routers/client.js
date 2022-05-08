@@ -104,34 +104,22 @@ router.post('/signup',upload, async (req,res)=>{
     
 });
 // verif account
-router.put('/verifmail/:id', async (req, res)=> {
-    let id_client=req.params.id
-    console.log(id_client)
+router.put('/verifmail', async (req, res)=> {
     let code_client=req.body.code
-    var ObjectId = require('mongoose').Types.ObjectId;
-    if(!ObjectId.isValid(id_client)){
-        return res.status(301).send("Client Not Exist");
-    }
-
-    let client_verif = await Client.findById(id_client);
+    
+    let client_verif = await Client.findOne({confirmation_code : code_client });
       if (!client_verif){
           return res.status(404).send("Client Not Exist");
       }
       else{
-          console.log(client_verif.confirmation_code)
-          console.log(client_verif)
-          console.log(code_client)
-          if(client_verif.confirmation_code==code_client){
+         
             try {            
-                await Client.updateOne({_id : id_client}, {is_verified : 'true'});
+                await Client.updateOne({_id : client_verif._id}, {is_verified : 'true'});
                 res.status(200).send('Verified User !!');
             } catch (error) {
                 res.status(500).send('Error verify email Client  :'+error.message);
             }  
-        }
-        else {
-            return res.status(301).send("Error verify email Client code not exist!! ");
-        }
+        
       }
 });
 //update client (Edit Profil) without image
