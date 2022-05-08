@@ -4,7 +4,6 @@ const Joi = require('joi');
 const produit_schema = new mongoose.Schema({
     nom : String,
     categorie : String,
-    colors : [String],
     description : String,
     marque : String,
     date_ajout : {
@@ -14,15 +13,15 @@ const produit_schema = new mongoose.Schema({
     },
     quantite : Number,
     prix : Number,
-    image : [String]
+    image : String
 });
 
 let produit_validation = Joi.object({
     nom: Joi.string().required(),
     categorie: Joi.string().required(),
-    colors: Joi.array().items(Joi.string()),
     description: Joi.string().required(),
     marque: Joi.string().required(),
+    image: Joi.string(),
     quantite : Joi.number().min(0),
     prix : Joi.number(),
     

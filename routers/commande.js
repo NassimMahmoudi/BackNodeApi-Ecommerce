@@ -10,6 +10,10 @@ function validation(validator,req,res) {
 
 // Get Commandeby ID for test
 router.get('/:id',async (req,res)=>{
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(req.params.id)){
+        return res.status(301).send("Commande Not Exist");
+    }
     let commande = await Commande.findById(req.params.id)
     if (!commande){
           return res.status(400).json({
@@ -34,9 +38,13 @@ router.get('',async (req,res)=>{
 // Get all Commandes by id client
 router.get('/mycommandes/:id',async (req,res)=>{
     let client_id = req.params.id
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(client_id)){
+        return res.status(301).json({ message: "Client Not Exist"});
+    }
     let commandes = await Commande.find({id_client:client_id})
     if (!commandes){
-          return res.status(400).json({
+          return res.status(404).json({
             message: "Commande Not Exist"
           });
         }else{
@@ -68,7 +76,7 @@ router.put('/:id',async (req,res)=>{
     let status = req.body.status;
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(commande_id)){
-        return res.status(301).send("Commande Not Exist");
+        return res.status(404).send("Commande Not Exist");
     }
 
     let commande = await Commande.findById(commande_id);
@@ -88,11 +96,35 @@ router.put('/:id',async (req,res)=>{
 
 //delete Commande
 router.delete('/delete/:id',async (req,res)=>{
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(req.params._id)){
+        return res.status(404).send("Commande Not Exist");
+    }
     try {
         let commande = await Commande.findByIdAndRemove(req.params.id);
         if(!commande)
             return res.status(404).send('Commande with id is not found');
         res.send(commande);
+    }catch (error) {
+        res.status(400).send('Error Deleting Commande :'+error.message);
+    }
+    
+});
+//Cancel Commande
+router.delete('/cancel/:id',async (req,res)=>{
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(req.params.id)){
+        return res.status(404).send("Commande Not Exist");
+    }
+    try {
+        let commande = await Commande.findById(req.params.id);
+        if(!commande)
+            return res.status(404).send('Commande is not found');
+        if((commande.status == "En Attente")||(commande.status == "En attente")||(commande.status == "en attente")){
+            await Commande.deleteOne({_id: commande._id})
+            return res.status(200).json("Deleted Commande")
+        }
+        res.status(301).send(commande);
     }catch (error) {
         res.status(400).send('Error Deleting Commande :'+error.message);
     }

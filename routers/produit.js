@@ -1,15 +1,24 @@
 const router = require('express').Router();
 const {Produit, produit_validation} = require('../models/produit');
-// add Produit to DB 
-router.post('',async (req,res)=>{
+const upload= require("../middleware/upload");
+
+// add Product to DB 
+router.post('/add',upload,async (req,res)=>{
 
     try {
+        let product = new Produit({
+            nom : req.body.nom,
+            categorie : req.body.categorie,
+            description : req.body.description,
+            marque : req.body.marque,
+            quantite : req.body.quantite,
+            prix : req.body.prix,
+            image : req.file.filename,
+         });
         let results= produit_validation.validate(req.body);
         if(results.error)
             return res.status(403).send(results.error.details[0].message);
-        let produit = new Produit(req.body);
-        produit = await produit.save();
-        res.send(produit);
+        res.status(500).send(await product.save());
     } catch (error) {
         res.status(500).send('Error saving Product :'+error.message);
     }
@@ -37,7 +46,7 @@ router.get('',async (req,res)=>{
     
 });
 
-//update produit
+//update product
 router.put('/:id',async (req,res)=>{
     try {
         let results= produit_validation.validate(req.body);
