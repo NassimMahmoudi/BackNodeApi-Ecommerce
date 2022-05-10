@@ -9,9 +9,13 @@ const upload= require("../middleware/upload");
 
 // Get Agent by ID for test
 router.get('/:id',async (req,res)=>{
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(req.params.id)){
+        return res.status(200).json({ message : "Claim Not Exist" });
+    }
     let agent = await Agent.findById(req.params.id)
     if (!agent){
-          return res.status(404).send("Agent Not Exist");
+          return res.status(200).json({ message : "Agent Not Exist" });
         }else{
             res.status(200).send(agent);    
         }
@@ -28,12 +32,12 @@ router.post('/signin',async (req,res)=>{
           email
         });
         if (!agent)
-          return res.status(404).send("Agent Not Exist");
+          return res.status(200).json({ message : "Agent Not Exist" });
         let bool = await bcrypt.compare(pass, agent.pass);
         if(!bool)
-            return res.status(403).send('Incorrect Password !');
+            return res.status(200).json({ message : 'Incorrect Password !' });
         let token = jwt.sign({id: agent._id, name: agent.name, role: agent.role}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
-        res.header('x-access-token',token).send('Login Success !!!');
+        res.header('x-access-token',token).json({ message : 'Login Success !!!'});
           
     }catch (e) {
         console.error(e);
@@ -44,7 +48,7 @@ router.post('/signin',async (req,res)=>{
 //Logout Agent
 router.post('/logout', async (req, res)=>{
 	req.session.destroy();
-	res.status(200).send('Logout Success !!!');
+	res.status(200).json({ message : 'Logout Success !!!'});
 }); 
 // Add Agent
 router.post('/add',upload, async (req,res)=>{
@@ -63,7 +67,7 @@ router.post('/add',upload, async (req,res)=>{
     });
 
     try {
-        res.status(200).send(await agent.save());
+        res.status(200).json(await agent.save());
     } catch (error) {
         res.status(500).send(error.message);
     }
@@ -78,20 +82,20 @@ router.put('/edit/:email',async (req,res)=>{
         email
       });
       if (!agent)
-          return res.status(404).send("Agent Not Exist");
+          return res.status(200).json({ message : "Agent Not Exist" });
         if(old_pass===agent.pass){
             try {
                 let results= agent_validation_update.validate(req.body);
                 if(results.error)
-                    return res.status(403).send(results.error.details[0].message);
+                    return res.status(200).json({ message : results.error.details[0].message });
                 
                 await Agent.updateOne({_id : agent._id}, req.body);
-                res.status(200).send(await Agent.findById(agent._id));
+                res.status(200).json(await Agent.findById(agent._id));
             } catch (error) {
                 res.status(500).send('Error editing Agent Profil :'+error.message);
             }  
         }else{
-            return res.status(401).send("Incorrect Password !");
+            return res.status(200).json({ message : "Incorrect Password !" });
         }  
     
     
@@ -104,7 +108,7 @@ router.put('/editimage/:email', upload,async (req,res)=>{
         email
       });
     if (!agent)
-        return res.status(404).send("Agent Not Exist");
+        return res.status(200).json({ message : "Agent Not Exist" });
     if(req.file){
         new_image=req.file.filename;
         try{
@@ -115,9 +119,9 @@ router.put('/editimage/:email', upload,async (req,res)=>{
             console.log(err);
         }
         await Agent.updateOne({_id : agent._id}, {$set: { image : new_image} });
-        res.status(200).send(await Agent.findById(agent._id));
+        res.status(200).json(await Agent.findById(agent._id));
     }else{
-        res.status(403).send('You must select a new Image');
+        res.status(200).json({ message :'You must select a new Image' });
     }
 });
 //delete Agent 
@@ -125,8 +129,8 @@ router.delete('/delete/:id',async (req,res)=>{
     try {
         let agent = await Agent.findByIdAndRemove(req.params.id);
         if(!agent)
-            return res.status(404).send('Agent with id is not found');
-        res.send(agent);
+            return res.status(200).json({ message : 'Agent with id is not found' });
+        res.status(200).send(agent);
     }catch (error) {
         res.status(500).send('Error Deleting Agent :'+error.message);
     }

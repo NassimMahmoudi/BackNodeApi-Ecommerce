@@ -3,22 +3,22 @@ const Joi = require('joi');
 const offre_schema = new mongoose.Schema({
 
     prix : Number,
-    date_ajout : {
-        type : Date,
-        required: true,
-        default: Date.now,
-    },
     nom : String,
-    date_limit : Date,
+    expireAt: {
+        type: Date,
+        /* Defaults 7 days from now */
+        default: new Date(new Date().valueOf() + 604800000),
+        /* Remove doc 60 seconds after specified date */
+        expires: 60
+      },
     products : {}
    
-});
+}, { timestamps: true });
 
 let offre_validation = Joi.object({
     
     prix : Joi.number().required(),
     nom : Joi.string().required(),
-    date_limit : Joi.date().required(),
     products : Joi.any()
    
 });

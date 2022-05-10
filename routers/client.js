@@ -157,7 +157,7 @@ router.put('/editimage/:email', upload,async (req,res)=>{
         email
       });
     if (!client)
-        return res.status(404).send("Client Not Exist");
+        return res.status(200).json({ message : "Client Not Exist"});
     if(req.file){
         new_image=req.file.filename;
         try{
@@ -168,9 +168,9 @@ router.put('/editimage/:email', upload,async (req,res)=>{
             console.log(err);
         }
         await Client.updateOne({_id : client._id}, {$set: { image : new_image} });
-        res.status(200).send(await Client.findById(client._id));
+        res.status(200).json(await Client.findById(client._id));
     }else{
-        res.status(403).send('You must select a new Image');
+        res.status(200).json({ message : 'You must select a new Image' });
     }
 });
 //block client
@@ -178,17 +178,17 @@ router.put('/block/:id',async (req,res)=>{
     let client_id = req.params.id;
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(client_id)){
-        return res.status(301).send("Client Not Exist");
+        return res.status(200).json({ message : "Client Not Exist" });
     }
 
     let client = await Client.findById(client_id);
       if (!client){
-          return res.status(404).send("Client Not Exist");
+          return res.status(200).json({ message : "Client Not Exist" });
       }
       else{
         try {            
             await Client.updateOne({_id : client_id}, {is_blocked : 'true'});
-            res.status(200).send(await Client.findById(client_id));
+            res.status(200).json(await Client.findById(client_id));
         } catch (error) {
             res.status(500).send('Error blocking client  :'+error.message);
         }  
@@ -201,8 +201,8 @@ router.delete('/delete/:id',async (req,res)=>{
     try {
         let client = await Client.findByIdAndRemove(req.params.id);
         if(!client)
-            return res.status(404).send('Client with id is not found');
-        res.send(client);
+            return res.status(200).json({ message: 'Client with id is not found' });
+        res.status(200).json(client);
     }catch (error) {
         res.status(400).send('Error Deleting Client :'+error.message);
     }
