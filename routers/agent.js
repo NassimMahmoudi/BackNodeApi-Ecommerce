@@ -41,7 +41,7 @@ router.post('/signin',async (req,res)=>{
           
     }catch (e) {
         console.error(e);
-        res.status(500).send("Server Error");
+        res.status(500).json({ message : "Server Error" });
       }
      
 });
@@ -69,7 +69,7 @@ router.post('/add',upload, async (req,res)=>{
     try {
         res.status(200).json(await agent.save());
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(500).json({ message : error.message });
     }
     
 });
@@ -92,7 +92,7 @@ router.put('/edit/:email',async (req,res)=>{
                 await Agent.updateOne({_id : agent._id}, req.body);
                 res.status(200).json(await Agent.findById(agent._id));
             } catch (error) {
-                res.status(500).send('Error editing Agent Profil :'+error.message);
+                res.status(500).json({ message : 'Error editing Agent Profil :'+error.message });
             }  
         }else{
             return res.status(200).json({ message : "Incorrect Password !" });
@@ -130,9 +130,9 @@ router.delete('/delete/:id',async (req,res)=>{
         let agent = await Agent.findByIdAndRemove(req.params.id);
         if(!agent)
             return res.status(200).json({ message : 'Agent with id is not found' });
-        res.status(200).send(agent);
+        res.status(200).json(agent);
     }catch (error) {
-        res.status(500).send('Error Deleting Agent :'+error.message);
+        res.status(500).json({ message : 'Error Deleting Agent :'+error.message });
     }
     
 });

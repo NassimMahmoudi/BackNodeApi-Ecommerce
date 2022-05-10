@@ -20,7 +20,7 @@ router.post('/add',upload,async (req,res)=>{
             return res.status(200).json({ message : results.error.details[0].message });
         res.status(200).json(await product.save());
     } catch (error) {
-        res.status(500).send('Error saving Product :'+error.message);
+        res.status(500).json( { message : 'Error saving Product :'+error.message });
     }
     
 });
@@ -30,7 +30,7 @@ router.get('/:id',async (req,res)=>{
     if (!produit){
           return res.status(200).json({ message : "Product Not Exist" });
         }else{
-            res.status(200).send(produit);    
+            res.status(200).json(produit);    
         }
     
     });
@@ -41,7 +41,7 @@ router.get('',async (req,res)=>{
         let produits = await Produit.find();
         res.status(200).json(produits)
     } catch (error) {
-        res.status(500).send('Error get All Products :'+error.message);
+        res.status(500).json({ message : 'Error get All Products :'+error.message });
     }
     
 });
@@ -56,7 +56,7 @@ router.put('/:id',async (req,res)=>{
         await Produit.updateOne({_id : req.params.id}, req.body);
         res.status(200).json(await Produit.findById(req.params.id));
     } catch (error) {
-        res.status(500).send('Error updating Product :'+error.message);
+        res.status(500).json({ message : 'Error updating Product :'+error.message });
     }
     
 });
@@ -72,7 +72,7 @@ router.delete('delete/:id',async (req,res)=>{
             return res.status(200).json({ message : 'Product with id is not found' });
         res.status(200).json(produit);
     } catch (error) {
-        res.status(500).send('Error Deleting Product :'+error.message);
+        res.status(500).json({ message : 'Error Deleting Product :'+error.message });
     }
     
 });

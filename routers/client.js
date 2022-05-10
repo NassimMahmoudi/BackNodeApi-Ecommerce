@@ -11,12 +11,16 @@ var randomstring = require("randomstring");
 
 // Get Client by ID for test
 router.get('/:id',async (req,res)=>{
+    var ObjectId = require('mongoose').Types.ObjectId;
+    if(!ObjectId.isValid(req.params.id)){
+        return res.status(200).json({ message : "Client Not Exist" });
+    }
     let client = await Client.findById(req.params.id)
     
     if (!client){
-          return res.status(400).send("Client Not Exist");
+          return res.status(200).json({ message : "Client Not Exist" });
         }else{
-            res.status(200).send(client);    
+            res.status(200).json(client);    
         }
     });
 
@@ -24,9 +28,9 @@ router.get('/:id',async (req,res)=>{
 router.get('',async (req,res)=>{
     try {
         let clients = await Client.find();
-        res.status(200).send(clients)
+        res.status(200).json(clients)
     } catch (error) {
-        res.status(500).send('Error get All Clients :'+error.message);
+        res.status(500).json({ message : 'Error get All Clients :'+error.message });
     }
     
 });
@@ -40,21 +44,21 @@ router.post('/signin',async (req,res)=>{
           email
         });
         if (!client)
-            return res.status(404).json("Client Not Exist");
+            return res.status(200).json({ message : "Client Not Exist" });
         if (!client.is_verified)
-            return res.status(403).json('Not Verified Client!');
+            return res.status(200).json({ message : 'Not Verified Client!' });
         if (!client.is_blocked){
         let bool = await bcrypt.compare(pass, client.pass);
         if(!bool)
-            return res.status(403).send('Incorrect Password !');
+            return res.status(200).json( { message : 'Incorrect Password !' });
         let token = jwt.sign({id: client._id, name: client.name}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
-        res.header('x-access-token',token).send('Login Success !!!');
+        res.header('x-access-token',token).json({ message : 'Login Success !!!' });
         }else{
-            return res.status(403).json('Blocked Client!');
+            return res.status(200).json({ message : 'Blocked Client!' });
         }
     }catch (e) {
         console.error(e);
-        res.status(500).send("Server Error");
+        res.status(500).json({ message : "Server Error" });
       }
      
 });
@@ -62,7 +66,7 @@ router.post('/signin',async (req,res)=>{
 //Logout Client
 router.post('/logout', async (req, res)=>{
 	req.session.destroy();
-	res.status(200).send('Logout Success !!!');
+	res.status(200).json({ message : 'Logout Success !!!' });
 }); 
 
 // Signup Client
@@ -97,9 +101,9 @@ router.post('/signup',upload, async (req,res)=>{
         html.firstname = new_member.nom;
         html.confirmation_code = new_member.confirmation_code;
         service.Send_mail_new_client(from,new_member.email,subject,html);
-        res.status(200).send(new_member);
+        res.status(200).json(new_member);
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(500).json({ message : error.message });
     }
     
 });
@@ -109,15 +113,15 @@ router.put('/verifmail', async (req, res)=> {
     
     let client_verif = await Client.findOne({confirmation_code : code_client });
       if (!client_verif){
-          return res.status(404).send("Client Not Exist");
+          return res.status(200).json({ message : "Client Not Exist" });
       }
       else{
          
             try {            
                 await Client.updateOne({_id : client_verif._id}, {is_verified : 'true'});
-                res.status(200).send('Verified User !!');
+                res.status(200).json({ message : 'Verified User !!' });
             } catch (error) {
-                res.status(500).send('Error verify email Client  :'+error.message);
+                res.status(500).json( { message : 'Error verify email Client  :'+error.message });
             }  
         
       }
@@ -131,20 +135,20 @@ router.put('/edit/:email',async (req,res)=>{
         email
       });
       if (!client)
-          return res.status(404).send("Client Not Exist");
+          return res.status(200).json({ message : "Client Not Exist" });
         if(old_pass===client.pass){
             try {
                 let results= client_validation_update.validate(req.body);
                 if(results.error)
-                    return res.status(403).send(results.error.details[0].message);
+                    return res.status(200).json({ message : results.error.details[0].message });
                 
                 await Client.updateOne({_id : client._id}, req.body);
-                res.status(200).send(await Client.findById(client._id));
+                res.status(200).json(await Client.findById(client._id));
             } catch (error) {
-                res.status(500).send('Error editing Client Profil :'+error.message);
+                res.status(500).json({ message : 'Error editing Client Profil :'+error.message });
             }  
         }else{
-            return res.status(401).send("Incorrect Password !");
+            return res.status(200).json({ message : "Incorrect Password !" });
         }  
     
     
@@ -190,7 +194,7 @@ router.put('/block/:id',async (req,res)=>{
             await Client.updateOne({_id : client_id}, {is_blocked : 'true'});
             res.status(200).json(await Client.findById(client_id));
         } catch (error) {
-            res.status(500).send('Error blocking client  :'+error.message);
+            res.status(500).json('Error blocking client  :'+error.message);
         }  
       }
     
@@ -204,7 +208,7 @@ router.delete('/delete/:id',async (req,res)=>{
             return res.status(200).json({ message: 'Client with id is not found' });
         res.status(200).json(client);
     }catch (error) {
-        res.status(400).send('Error Deleting Client :'+error.message);
+        res.status(500).json({ message : 'Error Deleting Client :'+error.message });
     }
     
 });

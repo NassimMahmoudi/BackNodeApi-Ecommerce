@@ -24,7 +24,7 @@ router.get('',async (req,res)=>{
         let claims = await Claim.find();
         res.status(200).json(claims)
     } catch (error) {
-        res.status(500).send('Error get All claims :'+error.message);
+        res.status(500).json( { message : 'Error get All claims :'+error.message });
     }
     
 });
@@ -43,7 +43,7 @@ router.post('/add',async (req,res)=>{
     try {
         res.status(200).json(await claim.save());
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(500).json({ message : error.message });
     }
     
 });
@@ -62,7 +62,7 @@ router.delete('/delete/:id',async (req,res)=>{
               });
         res.status(200).json(claim);
     }catch (error) {
-        res.status(400).send('Error Deleting Claim :'+error.message);
+        res.status(500).json({ message : 'Error Deleting Claim :'+error.message });
     }
     
 });

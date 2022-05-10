@@ -4,7 +4,7 @@ const {Offre,offre_validation} = require('../models/offre');
 function validation(validator,req,res) {
     let results = validator.validate(req.body);
     if(results.error)
-        return res.status(400).send(results.error.details[0].message);
+        return res.status(200).send(results.error.details[0].message);
 }
 // Get Offre  by ID for test
 router.get('/:id',async (req,res)=>{
@@ -44,7 +44,7 @@ router.post('/add',async (req,res)=>{
     try {
         res.status(200).json(await offre.save());
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(500).json({ message : error.message });
     }
     
 });
@@ -58,10 +58,10 @@ router.delete('/delete/:id',async (req,res)=>{
     try {
         let offre = await Offre.findByIdAndRemove(req.params.id);
         if(!offre)
-            return res.status(200).json({message: 'Offre with this id is not found'});
-        res.status(200).send(offre);
+            return res.status(200).json({ message: 'Offre with this id is not found'});
+        res.status(200).json(offre);
     }catch (error) {
-        res.status(400).send('Error Deleting Offre :'+error.message);
+        res.status(500).json({ message : 'Error Deleting Offre :'+error.message });
     }
     
 });
