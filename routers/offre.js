@@ -30,7 +30,7 @@ router.get('',async (req,res)=>{
         let offres = await Offre.find();
         res.status(200).json(offres)
     } catch (error) {
-        res.status(500).send('Error get All offres :'+error.message);
+        res.status(400).json({ message : 'Error get All offres :'+error.message });
     }    
 });
 // Add Offre
@@ -44,7 +44,7 @@ router.post('/add',async (req,res)=>{
     try {
         res.status(200).json(await offre.save());
     } catch (error) {
-        res.status(500).json({ message : error.message });
+        res.status(400).json({ message : error.message });
     }
     
 });
@@ -61,7 +61,7 @@ router.delete('/delete/:id',async (req,res)=>{
             return res.status(200).json({ message: 'Offre with this id is not found'});
         res.status(200).json(offre);
     }catch (error) {
-        res.status(500).json({ message : 'Error Deleting Offre :'+error.message });
+        res.status(400).json({ message : 'Error Deleting Offre :'+error.message });
     }
     
 });

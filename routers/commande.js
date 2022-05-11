@@ -1,5 +1,4 @@
 const router = require('express').Router();
-var sha1 = require('sha1');
 const {Commande,commande_validation} = require('../models/commande');
 
 function validation(validator,req,res) {
@@ -31,7 +30,7 @@ router.get('',async (req,res)=>{
         let commandes = await Commande.find();
         res.status(200).json(commandes)
     } catch (error) {
-        res.status(500).json( { message : 'Error get All commandes :'+error.message });
+        res.status(400).json( { message : 'Error get All commandes :'+error.message });
     }
     
 });
@@ -66,7 +65,7 @@ router.post('/add',async (req,res)=>{
     try {
         res.status(200).json(await commande.save());
     } catch (error) {
-        res.status(500).json({ message : error.message });
+        res.status(400).json({ message : error.message });
     }
     
 });
@@ -88,7 +87,7 @@ router.put('/:id',async (req,res)=>{
             await Commande.updateOne({_id : commande_id}, {status : status});
             res.status(200).json(await Commande.findById(commande_id));
         } catch (error) {
-            res.status(500).json({ message : 'Error changing Commande status  :'+error.message });
+            res.status(400).json({ message : 'Error changing Commande status  :'+error.message });
         }  
       }
     
@@ -97,7 +96,7 @@ router.put('/:id',async (req,res)=>{
 //delete Commande
 router.delete('/delete/:id',async (req,res)=>{
     var ObjectId = require('mongoose').Types.ObjectId;
-    if(!ObjectId.isValid(req.params._id)){
+    if(!ObjectId.isValid(req.params.id)){
         return res.status(200).json({ message : "Commande Not Exist" });
     }
     try {
@@ -106,7 +105,7 @@ router.delete('/delete/:id',async (req,res)=>{
             return res.status(200).json({ message : 'Commande with id is not found' });
         res.status(200).json(commande);
     }catch (error) {
-        res.status(500).json({ message : 'Error Deleting Commande :'+error.message });
+        res.status(400).json({ message : 'Error Deleting Commande :'+error.message });
     }
     
 });
@@ -126,7 +125,7 @@ router.delete('/cancel/:id',async (req,res)=>{
         }
         res.status(200).json(commande);
     }catch (error) {
-        res.status(500).json({ message : 'Error Canceling Commande :'+error.message });
+        res.status(400).json({ message : 'Error Canceling Commande :'+error.message });
     }
     
 });

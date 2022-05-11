@@ -2,7 +2,6 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 var fs =require('fs');
-var sha1 = require('sha1');
 const {Client,client_validation} = require('../models/client');
 const upload= require("../middleware/upload");
 const service= require("../services/service");
@@ -30,7 +29,7 @@ router.get('',async (req,res)=>{
         let clients = await Client.find();
         res.status(200).json(clients)
     } catch (error) {
-        res.status(500).json({ message : 'Error get All Clients :'+error.message });
+        res.status(400).json({ message : 'Error get All Clients :'+error.message });
     }
     
 });
@@ -58,7 +57,7 @@ router.post('/signin',async (req,res)=>{
         }
     }catch (e) {
         console.error(e);
-        res.status(500).json({ message : "Server Error" });
+        res.status(400).json({ message : "Server Error" });
       }
      
 });
@@ -103,7 +102,7 @@ router.post('/signup',upload, async (req,res)=>{
         service.Send_mail_new_client(from,new_member.email,subject,html);
         res.status(200).json(new_member);
     } catch (error) {
-        res.status(500).json({ message : error.message });
+        res.status(400).json({ message : error.message });
     }
     
 });
@@ -121,7 +120,7 @@ router.put('/verifmail', async (req, res)=> {
                 await Client.updateOne({_id : client_verif._id}, {is_verified : 'true'});
                 res.status(200).json({ message : 'Verified User !!' });
             } catch (error) {
-                res.status(500).json( { message : 'Error verify email Client  :'+error.message });
+                res.status(400).json( { message : 'Error verify email Client  :'+error.message });
             }  
         
       }
@@ -145,7 +144,7 @@ router.put('/edit/:email',async (req,res)=>{
                 await Client.updateOne({_id : client._id}, req.body);
                 res.status(200).json(await Client.findById(client._id));
             } catch (error) {
-                res.status(500).json({ message : 'Error editing Client Profil :'+error.message });
+                res.status(400).json({ message : 'Error editing Client Profil :'+error.message });
             }  
         }else{
             return res.status(200).json({ message : "Incorrect Password !" });
@@ -194,7 +193,7 @@ router.put('/block/:id',async (req,res)=>{
             await Client.updateOne({_id : client_id}, {is_blocked : 'true'});
             res.status(200).json(await Client.findById(client_id));
         } catch (error) {
-            res.status(500).json('Error blocking client  :'+error.message);
+            res.status(400).json('Error blocking client  :'+error.message);
         }  
       }
     
@@ -208,7 +207,7 @@ router.delete('/delete/:id',async (req,res)=>{
             return res.status(200).json({ message: 'Client with id is not found' });
         res.status(200).json(client);
     }catch (error) {
-        res.status(500).json({ message : 'Error Deleting Client :'+error.message });
+        res.status(400).json({ message : 'Error Deleting Client :'+error.message });
     }
     
 });
