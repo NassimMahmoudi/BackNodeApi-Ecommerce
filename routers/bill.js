@@ -28,11 +28,10 @@ router.get("/download/:id_client/:id_commande",async (req, res) => {
     let products = [];
     for(let product in products_ids){
         let p = await Produit.findById(products_ids[product]._id)
-        console.log(p);
         products.push({
             name : p.nom,
             price : p.prix,
-            quantity : product.quantity,
+            quantity : products_ids[product].quantity,
         })
     }
     let bill = new Bill({
@@ -43,6 +42,7 @@ router.get("/download/:id_client/:id_commande",async (req, res) => {
         status : commande.status,
         products : products,
     });
+    console.log(bill);
     //let name_file=
     service.report(bill);
     //res.download("./files/"+name_file);
