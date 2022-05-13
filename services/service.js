@@ -33,8 +33,7 @@ async function Send_mail_new_client(from,to,subject,html) {
 										});
 															   
 }
-async function report(data) {
-	var timeStamp = new Date().getTime();
+async function report(res,data) {
 	var today = new Date();
 	today = moment().format("DD/MM/YYYY hh:mm");
 	var date_commande=data.date_commande;
@@ -52,56 +51,58 @@ async function report(data) {
 					+"</br>"
 					+"<h4 style=\"float:right;line-height: 100%;\">Report generated on "+today+" by "+fullname+"</h4>"
 					+"</br>"
-					+"<table style=\"font-family: 'Arial';font-size-adjust: 0.58;width:100%; border-color: #ddd;height:100px;border-collapse: collapse;padding:50px 20px;\">"
-						+"<tr style=\"background:#f2f2f2;\">"
-							+"<td colspan=\"1\" style=\"text-align: left;height:70px;\" rowspan=\"2\"><div><div><p>Order date&nbsp;</p></div></div></td>"
-							+"<td colspan=\"1\" rowspan=\"2\"><div><div><center><p>&nbsp;&nbsp;Order&nbsp;status&nbsp;&nbsp;</p></center></div></div></td>"
-							+"<td colspan=\"1\" rowspan=\"2\"><div><div><center><p>&nbsp;&nbsp;Costumer&nbsp;&nbsp;</p></center></div></div></td>"
-							+"<td colspan=\"3\" rowspan=\"1\"><div><div><center><p>&nbsp;&nbsp;Products&nbsp;&nbsp;</p></center></div></div></td>"
-							+"<td colspan=\"1\" rowspan=\"2\"><div><div><center><p>&nbsp;&nbsp;Total&nbsp;&nbsp;</p></center></div></div></td>"
+					+"<table style=\"font-family: 'Arial';font-size-adjust: 0.58;width:100%; border: solid 1px;height:100px;border-collapse: collapse;padding:50px 20px;\">"
+						+"<tr style=\"border: solid 1px;background:#f2f2f2;\">"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:15%;\"colspan=\"1\" style=\"text-align: left;height:70px;\" rowspan=\"2\"><div><div><p>Order date&nbsp;</p></div></div></td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:15%;\"colspan=\"1\" rowspan=\"2\"><div><div><center><p>&nbsp;&nbsp;Order&nbsp;status&nbsp;&nbsp;</p></center></div></div></td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\"colspan=\"1\" rowspan=\"2\"><div><div><center><p>&nbsp;&nbsp;Costumer&nbsp;&nbsp;</p></center></div></div></td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\"colspan=\"3\" rowspan=\"1\"><div><div><center><p>&nbsp;&nbsp;Products&nbsp;&nbsp;</p></center></div></div></td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\" colspan=\"1\" rowspan=\"2\"><div><div><center><p>&nbsp;&nbsp;Total&nbsp;&nbsp;</p></center></div></div></td>"
 						+"</tr>"
-						+"<tr style=\"background:#f2f2f2;\">"
-							+"<td><div><div><center><p>&nbsp;&nbsp;Name&nbsp;&nbsp;</p></center></div></div></td>"
-							+"<td><div><div><center><p>&nbsp;&nbsp;Price&nbsp;&nbsp;</p></center></div></div></td>"
-							+"<td><div><div><center><p>&nbsp;&nbsp;Quentity&nbsp;&nbsp</p></center></div><div></td>"
+						+"<tr style=\"border: solid 1px;background:#f2f2f2;\">"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\"><div><div><center><p>&nbsp;&nbsp;Name&nbsp;&nbsp;</p></center></div></div></td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\"><div><div><center><p>&nbsp;&nbsp;Price&nbsp;&nbsp;</p></center></div></div></td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\"><div><div><center><p>&nbsp;&nbsp;Quentity&nbsp;&nbsp</p></center></div><div></td>"
 						+"</tr>";
 
-		content=content+"<tr>"
-							+"<td style=\"text-align: left;height:80px;width:14%;\"> "+date_commande+"</td>"
-							+"<td style=\"text-align: left;height:80px;width:14%;\"> "+commande_status+"</td>"
-							+"<td style=\"text-align: center;width:13%;\">&nbsp; "+fullname+"&nbsp;<br>CIN: "+cin+"</td>";
+		content=content+"<tr style=\"border: solid 1px;\">"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:15%;\"> "+date_commande+"</td>"
+							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:15%;\"> "+commande_status+"</td>"
+							+"<td style=\"border: solid 1px;text-align: center;width:15%;\">&nbsp; "+fullname+"&nbsp;<br> "+cin+"</td>";
 		
-		content=content+"<td style=\"text-align: center;width:13%;\"> &nbsp;&nbsp;"+products[0].name+"</td>"
-						+"<td style=\"text-align: center;width:13%;\"> &nbsp;&nbsp;"+products[0].price+"</td>"
-						+"<td style=\"text-align: center;width:13%;\"> &nbsp;&nbsp;"+products[0].quantity+"</td>";
+		content=content+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].name+"</td>"
+						+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].price+"</td>"
+						+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].quantity+"</td>";
 		if(products.length==1){
-			content = content + "<td style=\"text-align: center;width:10%;\"> &nbsp;&nbsp;<strong>"+total+" Dinar </strong></td>"
+			content = content + "<td style=\"border: solid 1px;height:80px;text-align: center;width:14%;\"> &nbsp;&nbsp;<strong>"+total+" Dinar </strong></td>"
 							+ " </tr>"
 						+ " </table>";
 		}else{
-			content = content +"<td>&nbsp;&nbsp;</td>"
+			let price_prod=products[0].price*products[0].quantity;
+			content = content +"<td style=\"border: solid 1px;text-align: center;width:14%;\"><center>"+price_prod+"</center></td>"
 							+ "</tr>";
 		}							
 		for(i=1;i<products.length;i++){
+			let price_prod=products[i].price*products[i].quantity;
 		content=content + 
 						+ "<tr>"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td style=\"text-align: center;width:13%;\"> &nbsp;&nbsp;"+products[i].name+"</td>"
-						+ "<td style=\"text-align: center;width:13%;\"> &nbsp;&nbsp;"+products[i].price+"</td>"
-						+ "<td style=\"text-align: center;width:13%;\"> &nbsp;&nbsp;"+products[i].quantity+"</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
+						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].name+"</td>"
+						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].price+"</td>"
+						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].quantity+"</td>"
+						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\">&nbsp;&nbsp;"+price_prod+"&nbsp;&nbsp;</td>"
 						+ "</tr>";
 		}					
-		content = content +"<tr>"
+		content = content +"<tr style=\"border: solid 1px;\">"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
 						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td style=\"text-align: center;width:10%;\"> &nbsp;&nbsp;<strong>"+total+" Dinar </strong></td>"
+						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;<strong>"+total+" Dinar </strong></td>"
 						+ " </tr>"
 						+ " </table>";		
 	conversion({ 
@@ -109,9 +110,9 @@ async function report(data) {
 				footer: '<div style="float:right"><b>{#pageNum}/{#numPages}</b></div>',
 	
 	}, function(err, pdf) {
-		  var output = fs.createWriteStream('./files/bills'+timeStamp+'.pdf')
-		  pdf.stream.pipe(output);
-		  return "bills"+timeStamp+".pdf";		 
+		  //var output = fs.createWriteStream('./files/bills'+name_file+'.pdf')
+		  res.setHeader('content-type', 'application/pdf'); 
+		  pdf.stream.pipe(res);
 	});
 }
 module.exports = {

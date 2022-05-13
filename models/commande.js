@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+var moment = require("moment");
 const commande_schema = new mongoose.Schema({
 
     total : Number,
     date_ajout : {
-        type : Date,
+        type : String,
         required: true,
-        default: Date.now,
+        default: moment(Date.now()).format("YYYY/DD/MM hh:mm"),
     },
     id_client : String,
     status : String,

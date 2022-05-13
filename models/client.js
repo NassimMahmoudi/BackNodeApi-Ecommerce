@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
-const { boolean } = require('joi');
 const client_schema = new mongoose.Schema({
     cin : Number,
     nom : String,

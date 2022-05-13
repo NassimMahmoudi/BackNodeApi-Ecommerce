@@ -1,10 +1,10 @@
 const router = require('express').Router();
 var fs =require('fs');
-const {Bill,bill_validation } = require('../models/bill');
 const {Client} = require('../models/client');
 const {Commande,commande_validation} = require('../models/commande');
 const {Produit} = require('../models/produit');
 const service= require("../services/service");
+
 
 // Download pdf file
 router.get("/download/:id_client/:id_commande",async (req, res) => {
@@ -34,18 +34,18 @@ router.get("/download/:id_client/:id_commande",async (req, res) => {
             quantity : products_ids[product].quantity,
         })
     }
-    let bill = new Bill({
+    let bill = {
         fullname : fullname,
         cin : client.cin,
         total : commande.total,
         date_commande : commande.date_ajout,
         status : commande.status,
         products : products,
-    });
-    console.log(bill);
-    //let name_file=
-    service.report(bill);
-    //res.download("./files/"+name_file);
+    };
+    console.log(bill)
+    await service.report(res,bill);
+
+    //res.download("./files/bills"+namefile+".pdf");
   });
 
 module.exports=router;

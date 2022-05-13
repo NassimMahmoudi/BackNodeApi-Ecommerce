@@ -16,7 +16,7 @@ require("dotenv").config();
 let app = express();
 //cors provides Express middleware to enable CORS with various options
 var corsOptions = {
-    origin: "http://localhost:3001"
+    origin: "http://localhost:4200"
   };
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -38,6 +38,7 @@ app.use((req,res,next)=>{
 app.use(express.static('public')); 
 app.use('/assets/img', express.static('assets/img'));
 app.use('/uploads', express.static("uploads"));
+app.use('/files', express.static("files"));
 
 app.get('/', function (req, res) {
   res.send('<b>My</b> first express http server');
