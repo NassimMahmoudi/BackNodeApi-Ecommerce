@@ -2,7 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 var fs =require('fs');
-const {Client,client_validation} = require('../models/client');
+const {Client,client_validation,client_validation_update} = require('../models/client');
 const upload= require("../middleware/upload");
 const service= require("../services/service");
 var randomstring = require("randomstring");
@@ -70,6 +70,12 @@ router.post('/logout', async (req, res)=>{
 
 // Signup Client
 router.post('/signup',upload, async (req,res)=>{
+    let email = req.body.email;
+    let client_exist = await Client.findOne({
+        email
+      });
+      if (client_exist)
+          return res.status(200).json({ message : "Client Exist" });
     // crypting pass
     let salt = await bcrypt.genSalt(10);
     req.body.pass = await bcrypt.hash(req.body.pass, salt);
@@ -128,45 +134,46 @@ router.put('/verifmail', async (req, res)=> {
 //update client (Edit Profil) without image
 router.put('/edit/:email',async (req,res)=>{
     let email = req.params.email;
-    let old_pass = sha1(req.body.old_pass);
-    req.body.pass = sha1(req.body.pass);
+    let salt = await bcrypt.genSalt(10);
+    req.body.pass = await bcrypt.hash(req.body.pass, salt);
+    let old_pass = req.body.old_pass;
     let client = await Client.findOne({
         email
       });
-      if (!client)
-          return res.status(200).json({ message : "Client Not Exist" });
-        if(old_pass===client.pass){
-            try {
-                let results= client_validation_update.validate(req.body);
-                if(results.error)
-                    return res.status(200).json({ message : results.error.details[0].message });
-                
-                await Client.updateOne({_id : client._id}, req.body);
-                res.status(200).json(await Client.findById(client._id));
-            } catch (error) {
-                res.status(400).json({ message : 'Error editing Client Profil :'+error.message });
-            }  
-        }else{
-            return res.status(200).json({ message : "Incorrect Password !" });
-        }  
+    if (!client)
+        return res.status(200).json({ message : "Client Not Exist" });
+    let bool = await bcrypt.compare(old_pass,client.pass);
+    console.log(bool)
+    if(!bool)
+        return res.status(200).json({ message : 'Incorrect Password !' });
+    try {
+        let results= client_validation_update.validate(req.body);
+        if(results.error)
+            return res.status(200).json({ message : results.error.details[0].message });
+        
+        await Client.updateOne({_id : client._id}, req.body);
+        res.status(200).json(await Client.findById(client._id));
+    } catch (error) {
+        res.status(400).json({ message : 'Error editing Client Profil :'+error.message });
+    }  
+        
     
     
 });
 //update Client Image (Edit Profil image)
 router.put('/editimage/:email', upload,async (req,res)=>{
     let email = req.params.email;
-    let new_image='';
     let client = await Client.findOne({
         email
       });
     if (!client)
         return res.status(200).json({ message : "Client Not Exist"});
     if(req.file){
-        new_image=req.file.filename;
+        let new_image=req.file.filename;
         try{
             // Delete old Image from server
             // IN the front side you should pass the new image and the old image too
-            fs.unlinkSync("../uploads/"+ req.body.old_image);
+            fs.unlinkSync("../uploads/"+ req.body.old_image);//old_image in the front side must be a string from client.image 
         }catch(err){
             console.log(err);
         }
