@@ -51,7 +51,7 @@ router.get('',async (req,res)=>{
 });
 
 //update product without photo
-router.put('update/:id',[auth,autoris],async (req,res)=>{
+router.put('/update/:id',[auth,autoris],async (req,res)=>{
     try {
         let results= produit_validation.validate(req.body);
         if(results.error)
