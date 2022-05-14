@@ -6,15 +6,16 @@ const {Client,client_validation,client_validation_update} = require('../models/c
 const upload= require("../middleware/upload");
 const service= require("../services/service");
 var randomstring = require("randomstring");
-
+const auth = require('../middleware/auth');
+const autoris = require('../middleware/autoris');
 
 // Get Client by ID for test
-router.get('/:id',async (req,res)=>{
+router.get('/:id',[auth,autoris],async (req,res)=>{
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(req.params.id)){
         return res.status(200).json({ message : "Client Not Exist" });
     }
-    let client = await Client.findById(req.params.id)
+    let client = await Client.findById(req.params.id).select('-pass');
     
     if (!client){
           return res.status(200).json({ message : "Client Not Exist" });
@@ -24,9 +25,9 @@ router.get('/:id',async (req,res)=>{
     });
 
 // get All Clients
-router.get('',async (req,res)=>{
+router.get('',[auth,autoris],async (req,res)=>{
     try {
-        let clients = await Client.find();
+        let clients = await Client.find().select('-pass');
         res.status(200).json(clients)
     } catch (error) {
         res.status(400).json({ message : 'Error get All Clients :'+error.message });
@@ -50,7 +51,7 @@ router.post('/signin',async (req,res)=>{
         let bool = await bcrypt.compare(pass, client.pass);
         if(!bool)
             return res.status(200).json( { message : 'Incorrect Password !' });
-        let token = jwt.sign({id: client._id, name: client.name}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+        let token = jwt.sign({id: client._id, name: client.nom, role: 'CLIENT'}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
         res.header('x-access-token',token).json({ message : 'Login Success !!!' });
         }else{
             return res.status(200).json({ message : 'Blocked Client!' });
@@ -132,7 +133,7 @@ router.put('/verifmail', async (req, res)=> {
       }
 });
 //update client (Edit Profil) without image
-router.put('/edit/:email',async (req,res)=>{
+router.put('/edit/:email',auth,async (req,res)=>{
     let email = req.params.email;
     let salt = await bcrypt.genSalt(10);
     req.body.pass = await bcrypt.hash(req.body.pass, salt);
@@ -143,7 +144,6 @@ router.put('/edit/:email',async (req,res)=>{
     if (!client)
         return res.status(200).json({ message : "Client Not Exist" });
     let bool = await bcrypt.compare(old_pass,client.pass);
-    console.log(bool)
     if(!bool)
         return res.status(200).json({ message : 'Incorrect Password !' });
     try {
@@ -161,7 +161,7 @@ router.put('/edit/:email',async (req,res)=>{
     
 });
 //update Client Image (Edit Profil image)
-router.put('/editimage/:email', upload,async (req,res)=>{
+router.put('/editimage/:email', [auth,upload],async (req,res)=>{
     let email = req.params.email;
     let client = await Client.findOne({
         email
@@ -184,7 +184,7 @@ router.put('/editimage/:email', upload,async (req,res)=>{
     }
 });
 //block client
-router.put('/block/:id',async (req,res)=>{
+router.put('/block/:id',[auth,autoris],async (req,res)=>{
     let client_id = req.params.id;
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(client_id)){
@@ -207,7 +207,7 @@ router.put('/block/:id',async (req,res)=>{
 });
 
 //delete Client
-router.delete('/delete/:id',async (req,res)=>{
+router.delete('/delete/:id',[auth,autoris],async (req,res)=>{
     try {
         let client = await Client.findByIdAndRemove(req.params.id);
         if(!client)

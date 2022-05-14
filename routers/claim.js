@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const {Claim,claim_validation} = require('../models/claim');
-
+const autoris = require('../middleware/autoris');
 // Get Claimby ID 
 router.get('/:id',async (req,res)=>{
     var ObjectId = require('mongoose').Types.ObjectId;
@@ -19,7 +19,7 @@ router.get('/:id',async (req,res)=>{
     });
 
 // get All claims
-router.get('',async (req,res)=>{
+router.get('',[autoris],async (req,res)=>{
     try {
         let claims = await Claim.find();
         res.status(200).json(claims)
@@ -49,7 +49,7 @@ router.post('/add',async (req,res)=>{
 });
 
 //delete Claim
-router.delete('/delete/:id',async (req,res)=>{
+router.delete('/delete/:id',[autoris],async (req,res)=>{
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(req.params.id)){
         return res.status(200).json({ message : "Claim Not Exist"});

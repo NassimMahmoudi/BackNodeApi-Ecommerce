@@ -36,7 +36,7 @@ router.post('/signin',async (req,res)=>{
         let bool = await bcrypt.compare(pass, agent.pass);
         if(!bool)
             return res.status(200).json({ message : 'Incorrect Password !' });
-        let token = jwt.sign({id: agent._id, name: agent.name, role: agent.role}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
+        let token = jwt.sign({id: agent._id, name: agent.nom, role: agent.role}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'});
         res.header('x-access-token',token).json({ message : 'Login Success !!!'});
           
     }catch (e) {
@@ -74,43 +74,43 @@ router.post('/add',upload, async (req,res)=>{
     
 });
 //update agent (Edit Profil) without image
-router.put('/edit/:email',async (req,res)=>{
+router.put('/edit/:email',[auth,autoris],async (req,res)=>{
     let email = req.params.email;
-    let old_pass = sha1(req.body.old_pass);
-    req.body.pass = sha1(req.body.pass);
+    let salt = await bcrypt.genSalt(10);
+    req.body.pass = await bcrypt.hash(req.body.pass, salt);
+    let old_pass = req.body.old_pass;
     let agent = await Agent.findOne({
         email
       });
-      if (!agent)
-          return res.status(200).json({ message : "Agent Not Exist" });
-        if(old_pass===agent.pass){
-            try {
-                let results= agent_validation_update.validate(req.body);
-                if(results.error)
-                    return res.status(200).json({ message : results.error.details[0].message });
-                
-                await Agent.updateOne({_id : agent._id}, req.body);
-                res.status(200).json(await Agent.findById(agent._id));
-            } catch (error) {
-                res.status(400).json({ message : 'Error editing Agent Profil :'+error.message });
-            }  
-        }else{
-            return res.status(200).json({ message : "Incorrect Password !" });
-        }  
+    if (!agent)
+        return res.status(200).json({ message : "Agent Not Exist" });
+    let bool = await bcrypt.compare(old_pass,agent.pass);
+    if(!bool)
+        return res.status(200).json({ message : 'Incorrect Password !' });
+    try {
+        let results= agent_validation_update.validate(req.body);
+        if(results.error)
+            return res.status(200).json({ message : results.error.details[0].message });
+        
+        await Agent.updateOne({_id : agent._id}, req.body);
+        res.status(200).json(await Agent.findById(agent._id));
+    } catch (error) {
+        res.status(400).json({ message : 'Error editing Agent Profil :'+error.message });
+    }  
+        
     
     
 });
 //update agent Image (Edit Profil image)
-router.put('/editimage/:email', upload,async (req,res)=>{
+router.put('/editimage/:email', [auth,autoris,upload],async (req,res)=>{
     let email = req.params.email;
-    let new_image='';
     let agent = await Agent.findOne({
         email
       });
     if (!agent)
         return res.status(200).json({ message : "Agent Not Exist" });
     if(req.file){
-        new_image=req.file.filename;
+        let new_image=req.file.filename;
         try{
             // Delete old Image from server
             // IN the front side you should pass the new image and the old image too
@@ -125,7 +125,7 @@ router.put('/editimage/:email', upload,async (req,res)=>{
     }
 });
 //delete Agent 
-router.delete('/delete/:id',async (req,res)=>{
+router.delete('/delete/:id',[auth,autoris],async (req,res)=>{
     try {
         let agent = await Agent.findByIdAndRemove(req.params.id);
         if(!agent)

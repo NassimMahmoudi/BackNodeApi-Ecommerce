@@ -10,6 +10,7 @@ const commande_router = require('./routers/commande');
 const offre_router = require('./routers/offre');
 const claim_router = require('./routers/claim');
 const bill_router = require('./routers/bill');
+const auth = require('./middleware/auth');
 // get configaration from .env
 require("dotenv").config();
 
@@ -47,10 +48,10 @@ app.get('/', function (req, res) {
 app.use('/api/agent',agent_router);
 app.use('/api/produit',produit_router);
 app.use('/api/client',client_router);
-app.use('/api/commande',commande_router);
+app.use('/api/commande',auth,commande_router);
 app.use('/api/offre',offre_router);
-app.use('/api/claim',claim_router);
-app.use('/api/bill',bill_router);
+app.use('/api/claim',auth,claim_router);
+app.use('/api/bill',auth,bill_router);
 
 
 app.listen(process.env.PORT,() => {

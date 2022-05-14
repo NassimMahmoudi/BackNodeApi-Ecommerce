@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const {Commande,commande_validation} = require('../models/commande');
+const autoris = require('../middleware/autoris');
 
 function validation(validator,req,res) {
     let results = validator.validate(req.body);
@@ -25,7 +26,7 @@ router.get('/:id',async (req,res)=>{
     });
 
 // get All commandes
-router.get('',async (req,res)=>{
+router.get('',autoris,async (req,res)=>{
     try {
         let commandes = await Commande.find();
         res.status(200).json(commandes)
@@ -70,7 +71,7 @@ router.post('/add',async (req,res)=>{
     
 });
 //update status commande
-router.put('/:id',async (req,res)=>{
+router.put('update/:id',autoris,async (req,res)=>{
     let commande_id = req.params.id;
     let status = req.body.status;
     var ObjectId = require('mongoose').Types.ObjectId;
@@ -94,7 +95,7 @@ router.put('/:id',async (req,res)=>{
 });
 
 //delete Commande
-router.delete('/delete/:id',async (req,res)=>{
+router.delete('/delete/:id',autoris,async (req,res)=>{
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(req.params.id)){
         return res.status(200).json({ message : "Commande Not Exist" });

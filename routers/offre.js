@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const {Offre,offre_validation} = require('../models/offre');
+const autoris = require('../middleware/autoris');
+const auth = require('../middleware/auth');
 
 function validation(validator,req,res) {
     let results = validator.validate(req.body);
@@ -34,7 +36,7 @@ router.get('',async (req,res)=>{
     }    
 });
 // Add Offre
-router.post('/add',async (req,res)=>{
+router.post('/add',[auth,autoris],async (req,res)=>{
     validation(offre_validation,req,res);
     let offre= new Offre({
         prix : req.body.prix,
@@ -50,7 +52,7 @@ router.post('/add',async (req,res)=>{
 });
 
 //delete Offre
-router.delete('/delete/:id',async (req,res)=>{
+router.delete('/delete/:id',[auth,autoris],async (req,res)=>{
     var ObjectId = require('mongoose').Types.ObjectId;
     if(!ObjectId.isValid(req.params.id)){
         return res.status(200).json({ message: "Offre Not Exist"});
