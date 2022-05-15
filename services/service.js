@@ -65,12 +65,12 @@ async function report(res,data) {
 							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:14%;\"><div><div><center><p>&nbsp;&nbsp;Quentity&nbsp;&nbsp</p></center></div><div></td>"
 						+"</tr>";
 
-		content=content+"<tr style=\"border: solid 1px;\">"
+		content = content+"<tr style=\"border: solid 1px;\">"
 							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:15%;\"> "+date_commande+"</td>"
 							+"<td style=\"border: solid 1px;text-align: center;height:80px;width:15%;\"> "+commande_status+"</td>"
 							+"<td style=\"border: solid 1px;text-align: center;width:15%;\">&nbsp; "+fullname+"&nbsp;<br> "+cin+"</td>";
 		
-		content=content+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].name+"</td>"
+		content = content+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].name+"</td>"
 						+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].price+"</td>"
 						+"<td style=\"border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[0].quantity+"</td>";
 		if(products.length==1){
@@ -78,32 +78,33 @@ async function report(res,data) {
 							+ " </tr>"
 						+ " </table>";
 		}else{
-			let price_prod=products[0].price*products[0].quantity;
+			let price_prod = products[0].price*products[0].quantity;
 			content = content +"<td style=\"border: solid 1px;text-align: center;width:14%;\"><center>"+price_prod+"</center></td>"
 							+ "</tr>";
+			for(i=1;i<products.length;i++){
+				let price_prod=products[i].price*products[i].quantity;
+				content = content + "<tr>"
+								+ "<td>&nbsp;&nbsp;</td>"
+								+ "<td>&nbsp;&nbsp;</td>"
+								+ "<td>&nbsp;&nbsp;</td>"
+								+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].name+"</td>"
+								+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].price+"</td>"
+								+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].quantity+"</td>"
+								+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\">&nbsp;&nbsp;"+price_prod+"&nbsp;&nbsp;</td>"
+								+ "</tr>";
+			}					
+			content = content + "<tr>"
+							+ "<td>&nbsp;&nbsp;</td>"
+							+ "<td>&nbsp;&nbsp;</td>"
+							+ "<td>&nbsp;&nbsp;</td>"
+							+ "<td>&nbsp;&nbsp;</td>"
+							+ "<td>&nbsp;&nbsp;</td>"
+							+ "<td>&nbsp;&nbsp;</td>"
+							+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;<strong>"+total+" Dinar </strong></td>"
+							+ " </tr>"
+							+ " </table>";
 		}							
-		for(i=1;i<products.length;i++){
-			let price_prod=products[i].price*products[i].quantity;
-		content=content + "<tr>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].name+"</td>"
-						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].price+"</td>"
-						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;"+products[i].quantity+"</td>"
-						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\">&nbsp;&nbsp;"+price_prod+"&nbsp;&nbsp;</td>"
-						+ "</tr>";
-		}					
-		content=content + "<tr>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td>&nbsp;&nbsp;</td>"
-						+ "<td style=\"height:80px;border: solid 1px;text-align: center;width:14%;\"> &nbsp;&nbsp;<strong>"+total+" Dinar </strong></td>"
-						+ " </tr>"
-						+ " </table>";		
+				
 	conversion({ 
 				html:content,				
 				footer: '<div style="float:right"><b>{#pageNum}/{#numPages}</b></div>',
